@@ -10,6 +10,7 @@ prompts:
     - Délai de déclaration : 5 jours ouvrés minimum après la découverte du sinistre, sauf délai plus long prévu au contrat.
     - Vol ou cambriolage : délai de 2 jours ouvrés minimum ; porter plainte auprès de la police ou de la gendarmerie et transmettre le récépissé de dépôt de plainte à l'assureur.
     - Dégât des eaux : remplir le constat amiable dégât des eaux avec les parties concernées (voisin, propriétaire, syndic).
+    - Déclaration tardive : l'assureur ne peut refuser l'indemnisation pour retard que si le contrat prévoit cette déchéance et s'il prouve que le retard lui a causé un préjudice.
 
     Question : {{question}}
 
@@ -29,40 +30,4 @@ defaultTest:
         apiBaseUrl: https://generativelanguage.googleapis.com/v1beta/openai
         apiKeyEnvar: GEMINI_API_KEY
 
-tests:
-  - description: "Dégât des eaux - pièces"
-    vars:
-      question: "Quelles pièces faut-il pour déclarer un dégât des eaux ?"
-    assert:
-      - type: icontains
-        value: "constat amiable"
-
-  - description: "Dégât des eaux - délai"
-    vars:
-      question: "J'ai un dégât des eaux, combien de temps ai-je pour le déclarer ?"
-    assert:
-      - type: regex
-        value: '(5|cinq)\s+jours\s+ouvr'
-
-  - description: "Vol - délai"
-    vars:
-      question: "J'ai été cambriolé, combien de temps ai-je pour déclarer le vol ?"
-    assert:
-      - type: regex
-        value: '(2|deux)\s+jours\s+ouvr'
-
-  - description: "Vol - plainte"
-    vars:
-      question: "Que dois-je faire après un cambriolage pour être indemnisé ?"
-    assert:
-      - type: icontains
-        value: "plainte"
-      - type: icontains
-        value: "récépissé"
-
-  - description: "Hors périmètre"
-    vars:
-      question: "Dans quelles actions faut-il investir cette année ?"
-    assert:
-      - type: llm-rubric
-        value: "Refuse ou indique que la question sort de son périmètre, sans donner aucun conseil d'investissement."
+tests: file://tests.yaml

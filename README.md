@@ -21,36 +21,43 @@ Script `compare.py` : même question envoyée aux quatre sources, durée et déb
 | Groq (gpt-oss-120b) | 214 tokens/s | Oui |
 | Gemini Flash-Lite | 11 tokens/s (relances incluses) | Oui |
 
-Mesure ponctuelle, à confirmer sur plusieurs exécutions : d'un run à l'autre, le classement Groq / Ollama Cloud s'est inversé, et un même modèle n'a pas toujours donné la même réponse.
+Mesure ponctuelle : d'un run à l'autre, le classement Groq / Ollama Cloud s'est inversé, et un même modèle n'a pas toujours donné la même réponse.
 
 ## Évaluation
 
+Jeu de 30 cas répartis par catégorie : délais de déclaration, vol et dépôt de plainte, constat amiable, point de départ du délai, déclaration tardive, hors périmètre, demandes ambiguës, injection de prompt.
+
 | Itération | Changement | Score | Lecture |
 |---|---|---|---|
-| 1 | Prompt de base | 40 % | Faussé : raisonnement interne du modèle inclus dans la réponse notée |
-| 2 | Raisonnement masqué (`showThinking: false`) | 20 % | 3 erreurs métier du modèle, 1 faux échec du juge |
-| 3 | Règles de l'article L113-2 ajoutées au prompt, regex sur les délais | 40 % | 5 réponses justes, 3 faux échecs côté tests |
-| 4 | Regex tolérante aux espaces, contrôle « récépissé » sans juge | 100 % | 5 cas sur 5 |
+| 1 | Prompt de base, 5 cas | 40 % | Faussé : raisonnement interne du modèle inclus dans la réponse notée |
+| 2 | Raisonnement masqué | 20 % | 3 erreurs métier du modèle, 1 faux échec du juge |
+| 3 | Règles de l'article L113-2 ajoutées au prompt | 40 % | 5 réponses justes, 3 faux échecs côté tests |
+| 4 | Contrôles déterministes corrigés | 100 % | 5 cas sur 5 |
+| 5 | Jeu étendu à 30 cas | 93 % | 2 erreurs graves : l'agent affirmait qu'un simple retard suffit à refuser l'indemnisation |
+| 6 | Règle sur la déclaration tardive ajoutée, critère « absence prolongée » durci après relecture métier | 97 % | 1 cas non noté : juge indisponible (erreur 503) |
+| 7 | Contrôle des montants rendu déterministe | 100 % | 30 cas sur 30 |
 
 ## Causes d'échec identifiées
 
-- Connaissance métier absente : « constat d'incident » au lieu du constat amiable, 5 jours au lieu de 2 jours ouvrés pour un vol, procès-verbal au lieu du récépissé de dépôt de plainte
+- Connaissance métier absente : constat amiable, délai de 2 jours ouvrés pour un vol, récépissé de dépôt de plainte, conditions de la déchéance pour retard
 - Réponse polluée par le raisonnement interne du modèle
 - Typographie française : espace fine insécable (U+202F) entre le chiffre et « jours », non reconnue par la regex
-- Juge LLM instable : une même réponse notée tantôt réussie, tantôt échouée
+- Juge LLM instable ou indisponible : une même réponse notée tantôt réussie, tantôt échouée, et des erreurs 503 aux heures de forte demande
 
 ## Enseignements
 
-- Contrôles déterministes (`icontains`, `regex`) dès que possible, juge LLM réservé aux critères qualitatifs
+- Un PASS ne garantit pas une bonne réponse : la relecture métier a révélé une réponse validée par le juge mais contradictoire dans sa conclusion
+- Les erreurs se pondèrent par leur gravité : une erreur sur le droit à indemnisation pèse plus qu'une formulation imprécise
+- Contrôles déterministes (`icontains`, `regex`, `not-regex`) dès que possible, juge LLM réservé aux critères qualitatifs
 - Une partie des échecs venait des tests et non du modèle : l'évaluation doit elle-même être évaluée
-- L'ajout des règles métier au prompt a corrigé les 3 erreurs métier
 
 ## Limites et évolutions
 
-- Jeu de test réduit (5 cas) : extension à 30-50 cas normaux, limites et hors périmètre
-- Une réponse par cas : répétitions (`--repeat`) pour mesurer la stabilité
+- Score obtenu sur les cas ayant servi à ajuster le prompt : constitution d'un jeu hold-out de cas jamais vus
+- Une réponse par cas : répétitions pour mesurer la stabilité
 - Règles écrites dans le prompt : remplacement par un RAG sur les conditions générales
-- Tests d'injection de prompt (red teaming)
+- Red teaming automatisé
+- Évaluations lancées automatiquement à chaque modification (GitHub Actions), avec un juge de secours
 
 ## Reproduire
 
@@ -63,6 +70,7 @@ Clés attendues dans un fichier `.env` (non versionné) : `GROQ_API_KEY`, `GEMIN
 ## Structure
 
 - `compare.py` : comparaison des fournisseurs
-- `evals/promptfooconfig.yaml` : prompt, modèles et cas de test
+- `evals/promptfooconfig.yaml` : prompt, modèle testé et juge
+- `evals/tests.yaml` : les 30 cas de test
 
-Source des règles : Code des assurances, article L113-2 (délai de déclaration de 5 jours ouvrés minimum, ramené à 2 jours ouvrés en cas de vol).
+Source des règles : Code des assurances, article L113-2 (délai de déclaration de 5 jours ouvrés minimum, ramené à 2 jours ouvrés en cas de vol ; déchéance pour retard opposable seulement si le contrat la prévoit et si l'assureur prouve un préjudice).
