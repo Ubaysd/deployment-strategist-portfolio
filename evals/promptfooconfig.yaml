@@ -30,7 +30,5 @@ defaultTest:
         apiBaseUrl: https://api.groq.com/openai/v1
         apiKeyEnvar: GROQ_API_KEY
         showThinking: false
-        max_tokens: 300
-        reasoning_effort: none
 
 tests: file://tests.yaml

@@ -25,6 +25,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PROMPTFOO_DISABLE_TELEMETRY: "1"
           LOG_LEVEL: debug
+          PROMPTFOO_REQUEST_BACKOFF_MS: "7000"
         run: npx --yes promptfoo@latest eval -c evals/promptfooconfig.yaml -j 1 --delay 10000 -o evals/results.json
 
       - name: Archiver les resultats
