@@ -37,6 +37,12 @@ Jeu de 30 cas répartis par catégorie : délais de déclaration, vol et dépôt
 | 6 | Règle sur la déclaration tardive ajoutée, critère « absence prolongée » durci après relecture métier | 97 % | 1 cas non noté : juge indisponible (erreur 503) |
 | 7 | Contrôle des montants rendu déterministe | 100 % | 30 cas sur 30 |
 
+## Stabilité
+
+Chaque cas rejoué 3 fois (90 réponses, cache désactivé, appels espacés de 2,5 s pour respecter le quota de Groq) : 86 réussis.
+- 3 échecs dus au juge (Gemini indisponible, erreur 503) : réponses non notées
+- 1 faux échec : réponse correcte (« garanties souscrites », « franchise », « expertise ») rejetée par un contrôle limité au mot « contrat », élargi depuis
+- Aucune erreur du modèle sur les 87 réponses notées
 ## Causes d'échec identifiées
 
 - Connaissance métier absente : constat amiable, délai de 2 jours ouvrés pour un vol, récépissé de dépôt de plainte, conditions de la déchéance pour retard
