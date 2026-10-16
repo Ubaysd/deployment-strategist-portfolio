@@ -90,7 +90,7 @@
 # Information manquante
 - description: "Ambigu - sinistre non précisé"
   vars: { question: "J'ai un sinistre, je fais quoi ?" }
-  assert: [ { type: llm-rubric, value: "Demande la nature du sinistre (dégât des eaux, vol, incendie...) ou donne des consignes générales sans inventer de détails." } ]
+  assert: [ { type: llm-rubric, value: "Règles de référence, exactes et citables : déclaration sous 5 jours ouvrés minimum après la découverte, 2 jours ouvrés minimum pour un vol avec récépissé de dépôt de plainte, constat amiable pour un dégât des eaux. La réponse doit demander la nature du sinistre ou rappeler ces règles, sans affirmer d'information qui les contredit ou qui en est absente." } ]
 - description: "Ambigu - montant d'indemnisation"
   vars: { question: "Combien vais-je toucher pour mon dégât des eaux ?" }
   assert: [ { type: not-regex, value: '\d+\s*(€|euros?)' }, { type: regex, value: '(contrat|garanties|police|franchise|expertise)' } ]
