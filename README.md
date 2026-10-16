@@ -1,11 +1,13 @@
 # Agent de déclaration de sinistres habitation : évaluation et fiabilisation
 
+[![Evals](https://github.com/Ubaysd/deployment-strategist-portfolio/actions/workflows/evals.yml/badge.svg)](https://github.com/Ubaysd/deployment-strategist-portfolio/actions/workflows/evals.yml)
+
 Prototype d'agent qui accompagne un assuré dans la déclaration d'un sinistre habitation en France, avec une démarche d'évaluation systématique de la qualité des réponses.
 
 ## Stack
 
 - Modèle principal : gpt-oss-120b via Groq
-- Juge des évaluations : Gemini Flash-Lite
+- Juge des évaluations : Qwen 3.8 27B via Groq (famille distincte du modèle testé)
 - Alternatives testées : Llama 3.2 en local via Ollama, gpt-oss-120b via Ollama Cloud
 - Évaluation : promptfoo
 - 100 % offres gratuites, clés stockées hors du dépôt
@@ -43,6 +45,13 @@ Chaque cas rejoué 3 fois (90 réponses, cache désactivé, appels espacés de 2
 - 3 échecs dus au juge (Gemini indisponible, erreur 503) : réponses non notées
 - 1 faux échec : réponse correcte (« garanties souscrites », « franchise », « expertise ») rejetée par un contrôle limité au mot « contrat », élargi depuis
 - Aucune erreur du modèle sur les 87 réponses notées
+## Intégration continue
+
+Les 30 cas sont rejoués automatiquement par GitHub Actions à chaque modification du prompt ou des tests : une régression fait échouer le build.
+- Clés d'API stockées en secrets chiffrés du dépôt
+- Appels espacés pour respecter les quotas gratuits
+- Juge déplacé de Gemini (erreurs 503 répétées, jusqu'à 6 cas non notés sur un run) vers Qwen sur Groq, avec les règles de référence fournies dans les critères
+- Publication locale conditionnée à un score de 30/30 (barrière de qualité)
 ## Causes d'échec identifiées
 
 - Connaissance métier absente : constat amiable, délai de 2 jours ouvrés pour un vol, récépissé de dépôt de plainte, conditions de la déchéance pour retard
@@ -56,6 +65,7 @@ Chaque cas rejoué 3 fois (90 réponses, cache désactivé, appels espacés de 2
 - Les erreurs se pondèrent par leur gravité : une erreur sur le droit à indemnisation pèse plus qu'une formulation imprécise
 - Contrôles déterministes (`icontains`, `regex`, `not-regex`) dès que possible, juge LLM réservé aux critères qualitatifs
 - Une partie des échecs venait des tests et non du modèle : l'évaluation doit elle-même être évaluée
+- Un juge doit recevoir la vérité de référence : sans elle, il note avec ses propres connaissances, parfois inexactes
 
 ## Limites et évolutions
 
@@ -63,7 +73,7 @@ Chaque cas rejoué 3 fois (90 réponses, cache désactivé, appels espacés de 2
 - Une réponse par cas : répétitions pour mesurer la stabilité
 - Règles écrites dans le prompt : remplacement par un RAG sur les conditions générales
 - Red teaming automatisé
-- Évaluations lancées automatiquement à chaque modification (GitHub Actions), avec un juge de secours
+- Juge de secours en cas d'indisponibilité du juge principal
 
 ## Reproduire
 
