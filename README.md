@@ -56,7 +56,8 @@ Chaque cas rejoué 3 fois (90 réponses, cache désactivé, appels espacés de 2
 
 Les 30 cas sont rejoués automatiquement par GitHub Actions à chaque modification du prompt, des tests ou du workflow : une régression fait échouer le build.
 - Clés d'API stockées en secrets chiffrés du dépôt
-- Appels espacés de 10 s : quota Groq de 8 000 tokens par minute et par modèle, prompt et réponse compris
+- Appels de l'agent espacés de 10 s : quota Groq de 8 000 tokens par minute et par modèle
+- Réponse du juge plafonnée à 300 tokens, raisonnement désactivé : quota Groq de 1 000 tokens générés par minute
 - Juge déplacé de Gemini (erreurs 503 répétées, jusqu'à 6 cas non notés sur un run) vers Qwen sur Groq, avec les règles de référence fournies dans les critères
 - Publication locale conditionnée à un score de 30/30 (barrière de qualité)
 
