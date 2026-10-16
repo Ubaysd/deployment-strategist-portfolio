@@ -1,4 +1,4 @@
-﻿import os, time
+import os, time
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -16,6 +16,7 @@ SOURCES = {
     "Ollama cloud": (ollama, "gpt-oss:120b-cloud"),
     "Groq":         (groq,   "openai/gpt-oss-120b"),
     "Gemini":       (gemini, "gemini-flash-lite-latest"),
+    "Groq Qwen":    (groq,   "qwen/qwen3.8-27b"),
 }
 
 for nom, (client, modele) in SOURCES.items():

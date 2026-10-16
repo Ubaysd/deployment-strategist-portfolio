@@ -8,22 +8,25 @@ Prototype d'agent qui accompagne un assuré dans la déclaration d'un sinistre h
 
 - Modèle principal : gpt-oss-120b via Groq
 - Juge des évaluations : Qwen 3.8 27B via Groq (famille distincte du modèle testé)
-- Alternatives testées : Llama 3.2 en local via Ollama, gpt-oss-120b via Ollama Cloud
-- Évaluation : promptfoo
-- 100 % offres gratuites, clés stockées hors du dépôt
+- Alternatives testées : Llama 3.2 en local via Ollama, gpt-oss-120b via Ollama Cloud, Gemini Flash-Lite
+- Évaluation : promptfoo, rejouée en intégration continue par GitHub Actions
+- 100&nbsp;% offres gratuites, clés stockées hors du dépôt
 
 ## Comparaison des fournisseurs
 
-Script `compare.py` : même question envoyée aux quatre sources, durée et débit mesurés.
+Script `compare.py` : même question envoyée aux cinq sources, durée et débit mesurés sur 2 exécutions (1 pour Qwen).
 
 | Source | Débit mesuré | Réponse métier correcte |
 |---|---|---|
-| Ollama local (Llama 3.2) | 14 tokens/s | Non |
-| Ollama Cloud (gpt-oss-120b) | 191 tokens/s | Non |
-| Groq (gpt-oss-120b) | 214 tokens/s | Oui |
-| Gemini Flash-Lite | 11 tokens/s (relances incluses) | Oui |
+| Ollama local (Llama 3.2) | 4 à 14 tokens/s | Non |
+| Ollama Cloud (gpt-oss-120b) | 150 à 191 tokens/s | Non |
+| Groq (gpt-oss-120b) | 72 à 214 tokens/s | Oui |
+| Gemini Flash-Lite | 11 à 17 tokens/s (relances incluses) | Oui |
+| Groq (Qwen 3.8 27B) | 270 tokens/s | Non |
 
-Mesure ponctuelle : d'un run à l'autre, le classement Groq / Ollama Cloud s'est inversé, et un même modèle n'a pas toujours donné la même réponse.
+- Débits très variables d'une exécution à l'autre : une mesure isolée ne suffit pas à classer des fournisseurs
+- Un même modèle (gpt-oss-120b) ne donne pas la même réponse selon l'hébergeur ni d'un run à l'autre
+- Qwen, le plus rapide, ignore la règle métier mais juge correctement dès qu'on lui fournit la référence : la qualité d'un juge dépend du contexte qu'on lui donne
 
 ## Évaluation
 
@@ -48,19 +51,22 @@ Chaque cas rejoué 3 fois (90 réponses, cache désactivé, appels espacés de 2
 - 3 échecs dus au juge (Gemini indisponible, erreur 503) : réponses non notées
 - 1 faux échec : réponse correcte (« garanties souscrites », « franchise », « expertise ») rejetée par un contrôle limité au mot « contrat », élargi depuis
 - Aucune erreur du modèle sur les 87 réponses notées
+
 ## Intégration continue
 
-Les 30 cas sont rejoués automatiquement par GitHub Actions à chaque modification du prompt ou des tests : une régression fait échouer le build.
+Les 30 cas sont rejoués automatiquement par GitHub Actions à chaque modification du prompt, des tests ou du workflow : une régression fait échouer le build.
 - Clés d'API stockées en secrets chiffrés du dépôt
 - Appels espacés pour respecter les quotas gratuits
 - Juge déplacé de Gemini (erreurs 503 répétées, jusqu'à 6 cas non notés sur un run) vers Qwen sur Groq, avec les règles de référence fournies dans les critères
 - Publication locale conditionnée à un score de 30/30 (barrière de qualité)
+
 ## Causes d'échec identifiées
 
 - Connaissance métier absente : constat amiable, délai de 2 jours ouvrés pour un vol, récépissé de dépôt de plainte, conditions de la déchéance pour retard
 - Réponse polluée par le raisonnement interne du modèle
 - Typographie française : espace fine insécable (U+202F) entre le chiffre et « jours », non reconnue par la regex
 - Juge LLM instable ou indisponible : une même réponse notée tantôt réussie, tantôt échouée, et des erreurs 503 aux heures de forte demande
+- Critère de notation ambigu : deux juges en désaccord sur la même réponse
 
 ## Enseignements
 
@@ -69,27 +75,34 @@ Les 30 cas sont rejoués automatiquement par GitHub Actions à chaque modificati
 - Contrôles déterministes (`icontains`, `regex`, `not-regex`) dès que possible, juge LLM réservé aux critères qualitatifs
 - Une partie des échecs venait des tests et non du modèle : l'évaluation doit elle-même être évaluée
 - Un juge doit recevoir la vérité de référence : sans elle, il note avec ses propres connaissances, parfois inexactes
+- Deux juges en désaccord signalent un critère mal formulé
 
 ## Limites et évolutions
 
 - Score obtenu sur les cas ayant servi à ajuster le prompt : constitution d'un jeu hold-out de cas jamais vus
-- Une réponse par cas : répétitions pour mesurer la stabilité
 - Règles écrites dans le prompt : remplacement par un RAG sur les conditions générales
 - Red teaming automatisé
 - Juge de secours en cas d'indisponibilité du juge principal
 
 ## Reproduire
 
+En local :
+
     pip install openai python-dotenv
     python compare.py
-    npx promptfoo@latest eval -c evals/promptfooconfig.yaml -j 1
+    npx promptfoo@latest eval -c evals/promptfooconfig.yaml -j 1 --delay 2500
 
 Clés attendues dans un fichier `.env` (non versionné) : `GROQ_API_KEY`, `GEMINI_API_KEY`.
+
+En CI, relance manuelle :
+
+    gh workflow run evals.yml
 
 ## Structure
 
 - `compare.py` : comparaison des fournisseurs
-- `evals/promptfooconfig.yaml` : prompt, modèle testé et juge
+- `evals/promptfooconfig.yaml` : prompt de l'agent, modèle testé et juge
 - `evals/tests.yaml` : les 30 cas de test
+- `.github/workflows/evals.yml` : intégration continue (GitHub Actions)
 
 Source des règles : Code des assurances, article L113-2 (délai de déclaration de 5 jours ouvrés minimum, ramené à 2 jours ouvrés en cas de vol ; déchéance pour retard opposable seulement si le contrat la prévoit et si l'assureur prouve un préjudice).
