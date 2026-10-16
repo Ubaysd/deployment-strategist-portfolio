@@ -31,13 +31,16 @@ Jeu de 30 cas répartis par catégorie : délais de déclaration, vol et dépôt
 
 | Itération | Changement | Score | Lecture |
 |---|---|---|---|
-| 1 | Prompt de base, 5 cas | 40 % | Faussé : raisonnement interne du modèle inclus dans la réponse notée |
-| 2 | Raisonnement masqué | 20 % | 3 erreurs métier du modèle, 1 faux échec du juge |
-| 3 | Règles de l'article L113-2 ajoutées au prompt | 40 % | 5 réponses justes, 3 faux échecs côté tests |
-| 4 | Contrôles déterministes corrigés | 100 % | 5 cas sur 5 |
-| 5 | Jeu étendu à 30 cas | 93 % | 2 erreurs graves : l'agent affirmait qu'un simple retard suffit à refuser l'indemnisation |
-| 6 | Règle sur la déclaration tardive ajoutée, critère « absence prolongée » durci après relecture métier | 97 % | 1 cas non noté : juge indisponible (erreur 503) |
-| 7 | Contrôle des montants rendu déterministe | 100 % | 30 cas sur 30 |
+| 1 | Prompt de base, 5 cas | 40&nbsp;% | Faussé : raisonnement interne du modèle inclus dans la réponse notée |
+| 2 | Raisonnement masqué | 20&nbsp;% | 3 erreurs métier du modèle, 1 faux échec du juge |
+| 3 | Règles de l'article L113-2 ajoutées au prompt | 40&nbsp;% | 5 réponses justes, 3 faux échecs côté tests |
+| 4 | Contrôles déterministes corrigés | 100&nbsp;% | 5 cas sur 5 |
+| 5 | Jeu étendu à 30 cas | 93&nbsp;% | 2 erreurs graves : l'agent affirmait qu'un simple retard suffit à refuser l'indemnisation |
+| 6 | Règle sur la déclaration tardive ajoutée, critère « absence prolongée » durci après relecture métier | 97&nbsp;% | 1 cas non noté : juge indisponible (erreur 503) |
+| 7 | Contrôle des montants rendu déterministe | 100&nbsp;% | 30 cas sur 30 |
+| 8 | Stabilité : chaque cas rejoué 3 fois (90 réponses) | 96&nbsp;% | Aucune erreur du modèle : 3 cas non notés (juge en 503), 1 contrôle trop strict élargi |
+| 9 | Évals lancées en CI (GitHub Actions), juge Gemini | 80&nbsp;% | 6 cas non notés : juge indisponible (erreur 503) |
+| 10 | Juge remplacé par Qwen sur Groq, règles de référence fournies dans les critères | 100&nbsp;% | 30 cas sur 30, en local et en CI |
 
 ## Stabilité
 
