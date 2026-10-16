@@ -1,18 +1,21 @@
-import os, time
+﻿import os, time
 from dotenv import load_dotenv
 from openai import OpenAI
 
-load_dotenv()  # lit le fichier .env et charge GROQ_API_KEY
+load_dotenv()  # lit GROQ_API_KEY et GEMINI_API_KEY dans .env
 
 QUESTION = "En 3 phrases : quelles pièces faut-il pour déclarer un dégât des eaux ?"
 
 ollama = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
 groq = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=os.getenv("GROQ_API_KEY"))
+gemini = OpenAI(base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+                api_key=os.getenv("GEMINI_API_KEY"))
 
 SOURCES = {
     "Ollama local": (ollama, "llama3.2"),
     "Ollama cloud": (ollama, "gpt-oss:120b-cloud"),
     "Groq":         (groq,   "openai/gpt-oss-120b"),
+    "Gemini":       (gemini, "gemini-flash-lite-latest"),
 }
 
 for nom, (client, modele) in SOURCES.items():
