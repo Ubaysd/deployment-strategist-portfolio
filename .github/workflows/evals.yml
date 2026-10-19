@@ -21,7 +21,8 @@ jobs:
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PROMPTFOO_DISABLE_TELEMETRY: "1"
-          LOG_LEVEL: debug        run: npx --yes promptfoo@latest eval -c evals/promptfooconfig-rapide.yaml -j 1 --delay 10000 -o evals/results.json
+          LOG_LEVEL: debug
+        run: npx --yes promptfoo@latest eval -c evals/promptfooconfig-rapide.yaml -j 1 --delay 10000 -o evals/results.json
       - name: Archiver les resultats
         if: always()
         uses: actions/upload-artifact@v7
