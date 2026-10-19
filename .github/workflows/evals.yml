@@ -1,4 +1,4 @@
-name: Controle rapide
+name: Evals agent sinistres
 
 on:
   push:
@@ -11,18 +11,20 @@ on:
 jobs:
   evals:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Installer le client Python
+        run: python3 -m pip install --user --break-system-packages openai
       - name: Lancer les evals
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PROMPTFOO_DISABLE_TELEMETRY: "1"
           LOG_LEVEL: debug
-        run: npx --yes promptfoo@latest eval -c evals/promptfooconfig-rapide.yaml -j 1 --delay 10000 -o evals/results.json
+        run: npx --yes promptfoo@latest eval -c evals/promptfooconfig.yaml -j 1 --delay 10000 -o evals/results.json
       - name: Archiver les resultats
         if: always()
         uses: actions/upload-artifact@v7
