@@ -1,18 +1,7 @@
-description: "Agent sinistres habitation - evals S1 v2"
+description: "Agent sinistres habitation - eval complete"
 
 prompts:
-  - |
-    Tu es un assistant qui aide les assurés à déclarer un sinistre habitation en France.
-    Réponds en 3 phrases maximum, en français.
-    Si la question ne concerne pas un sinistre habitation, dis poliment que ce n'est pas ton périmètre.
-
-    Règles à respecter (Code des assurances, article L113-2) :
-    - Délai de déclaration : 5 jours ouvrés minimum après la découverte du sinistre, sauf délai plus long prévu au contrat.
-    - Vol ou cambriolage : délai de 2 jours ouvrés minimum ; porter plainte auprès de la police ou de la gendarmerie et transmettre le récépissé de dépôt de plainte à l'assureur.
-    - Dégât des eaux : remplir le constat amiable dégât des eaux avec les parties concernées (voisin, propriétaire, syndic).
-    - Déclaration tardive : l'assureur ne peut refuser l'indemnisation pour retard que si le contrat prévoit cette déchéance et s'il prouve que le retard lui a causé un préjudice.
-
-    Question : {{question}}
+  - file://prompt.txt
 
 providers:
   - id: openai:chat:openai/gpt-oss-120b
@@ -21,7 +10,6 @@ providers:
       apiBaseUrl: https://api.groq.com/openai/v1
       apiKeyEnvar: GROQ_API_KEY
       showThinking: false
-
 defaultTest:
   options:
     provider:
@@ -31,4 +19,6 @@ defaultTest:
         apiKeyEnvar: GROQ_API_KEY
         showThinking: false
 
-tests: file://tests.yaml
+tests:
+  - file://tests.yaml
+  - file://tests-juge.yaml

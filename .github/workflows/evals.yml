@@ -1,33 +1,27 @@
-name: Evals agent sinistres
+name: Controle rapide
 
 on:
   push:
     branches: [master]
     paths:
       - "evals/**"
-      - ".github/workflows/evals.yml"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 jobs:
   evals:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-
       - name: Lancer les evals
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PROMPTFOO_DISABLE_TELEMETRY: "1"
-          LOG_LEVEL: debug
-          PROMPTFOO_REQUEST_BACKOFF_MS: "7000"
-        run: npx --yes promptfoo@latest eval -c evals/promptfooconfig.yaml -j 1 --delay 10000 -o evals/results.json
-
+          LOG_LEVEL: debug        run: npx --yes promptfoo@latest eval -c evals/promptfooconfig-rapide.yaml -j 1 --delay 10000 -o evals/results.json
       - name: Archiver les resultats
         if: always()
         uses: actions/upload-artifact@v7

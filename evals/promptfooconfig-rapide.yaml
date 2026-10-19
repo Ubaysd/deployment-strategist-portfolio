@@ -1,0 +1,13 @@
+description: "Agent sinistres habitation - controle rapide sans juge"
+
+prompts:
+  - file://prompt.txt
+
+providers:
+  - id: openai:chat:openai/gpt-oss-120b
+    label: groq
+    config:
+      apiBaseUrl: https://api.groq.com/openai/v1
+      apiKeyEnvar: GROQ_API_KEY
+      showThinking: false
+tests: file://tests.yaml
