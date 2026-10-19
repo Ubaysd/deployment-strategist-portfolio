@@ -1,3 +1,4 @@
 .env
 evals/results.json
 ci-results/
+__pycache__/
